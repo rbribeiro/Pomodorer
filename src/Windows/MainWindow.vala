@@ -104,7 +104,8 @@ namespace App.Windows {
 
         void on_pomodoro_start (State state) {
             timer_header.title = state.to_string ();
-
+            Granite.Services.Application.set_progress_visible.begin (true);
+            Granite.Services.Application.set_progress.begin (0);
             Idle.add (() => {
                 timer_label.set_time_in_seconds (pomodoro.timer.get_remaining_time ());
                 return Source.REMOVE;
@@ -112,6 +113,10 @@ namespace App.Windows {
 
             cancellable = new Cancellable ();
             Timeout.add_seconds (1, () => {
+                double elapsed_time = pomodoro.timer.get_elapsed_time ();
+                double total_time = pomodoro.timer.get_total_time ();
+                double progress = elapsed_time / total_time;
+                Granite.Services.Application.set_progress.begin (progress);
                 timer_label.set_time_in_seconds (pomodoro.timer.get_remaining_time ());
                 return !cancellable.is_cancelled ();
             });
@@ -121,6 +126,7 @@ namespace App.Windows {
           if (cancellable != null) {
             cancellable.cancel ();
             timer_header.title = _("Finished");
+            Granite.Services.Application.set_progress_visible.begin (false);
           }
         }
 
