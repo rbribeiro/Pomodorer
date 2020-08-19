@@ -8,13 +8,14 @@ namespace App.Windows {
         TimerLabel timer_label;
         Cancellable cancellable;
         Service pomodoro;
+        Gtk.Grid timer_grid;
         App.Configs.Settings settings;
 
         public MainWindow (Gtk.Application application) {
             Object (
                 application: application,
-                height_request: 600,
-                width_request: 800,
+                height_request: 550,
+                width_request: 400,
                 resizable: true,
                 title: (_("Cyfrif")),
                 icon_name: "com.github.aimproxy.cyfrif"
@@ -41,42 +42,48 @@ namespace App.Windows {
 
             var actions_grid = new Gtk.Grid ();
             actions_grid.get_style_context ().add_class ("actions-grid");
-            actions_grid.orientation = Gtk.Orientation.VERTICAL;
+            actions_grid.orientation = Gtk.Orientation.HORIZONTAL;
             actions_grid.row_spacing = 12;
+            actions_grid.hexpand = true;
+            actions_grid.valign = Gtk.Align.CENTER;
             actions_grid.margin = 12;
-            actions_grid.add (label_app);
+           // actions_grid.add (label_app);
             actions_grid.add (start_btn);
             actions_grid.add (pause_btn);
             actions_grid.add (stop_btn);
 
             var timer_view_label = create_timer_label ();
 
-            var timer_grid = new Gtk.Grid ();
+            timer_grid = new Gtk.Grid ();
             timer_grid.get_style_context ().add_class ("timer-grid");
             timer_grid.attach (timer_view_label, 0, 0, 3, 1);
 
             var main_grid = new Gtk.Grid ();
-            main_grid.add (actions_grid);
+            main_grid.orientation = Gtk.Orientation.VERTICAL;
             main_grid.add (timer_grid);
+            main_grid.add (actions_grid);
 
-            var actions_header = new Gtk.HeaderBar ();
+            /*var actions_header = new Gtk.HeaderBar ();
             actions_header.decoration_layout = "close:";
             actions_header.show_close_button = true;
-            actions_header.title = _("Cyfrif");
+            actions_header.title = _("Pomodorer");
 
             var actions_header_context = actions_header.get_style_context ();
             actions_header_context.add_class ("actions-header");
             actions_header_context.add_class ("titlebar");
-            actions_header_context.add_class ("default-decoration");
-            actions_header_context.add_class (Gtk.STYLE_CLASS_FLAT);
+            //actions_header_context.add_class ("default-decoration");
+            actions_header_context.add_class (Gtk.STYLE_CLASS_FLAT);*/
 
             timer_header = new Gtk.HeaderBar ();
+            timer_header.decoration_layout = "close";
+            timer_header.show_close_button = true;
             timer_header.hexpand = true;
 
             var timer_header_context = timer_header.get_style_context ();
             timer_header_context.add_class ("timer-header");
             timer_header_context.add_class ("titlebar");
-            timer_header_context.add_class ("default-decoration");
+            timer_header.title = _("Pomodorer");
+           // timer_header_context.add_class ("default-decoration");
             timer_header_context.add_class (Gtk.STYLE_CLASS_FLAT);
 
             var menu = new Gtk.Popover (null);
@@ -91,21 +98,23 @@ namespace App.Windows {
             timer_header.pack_end (menu_btn);
 
             var header_grid = new Gtk.Grid ();
-            header_grid.add (actions_header);
+            //header_grid.add (actions_header);
             header_grid.add (timer_header);
 
             var sizegroup = new Gtk.SizeGroup (Gtk.SizeGroupMode.HORIZONTAL);
-            sizegroup.add_widget (actions_grid);
-            sizegroup.add_widget (actions_header);
+           // sizegroup.add_widget (actions_grid);
+            //sizegroup.add_widget (actions_header);
 
             add (main_grid);
             set_titlebar (header_grid);
+            
         }
 
         void on_pomodoro_start (State state) {
             timer_header.title = state.to_string ();
             Granite.Services.Application.set_progress_visible.begin (true);
             Granite.Services.Application.set_progress.begin (0);
+            
             Idle.add (() => {
                 timer_label.set_time_in_seconds (pomodoro.timer.get_remaining_time ());
                 return Source.REMOVE;
@@ -145,6 +154,11 @@ namespace App.Windows {
             Gtk.Button btn_start = new Gtk.Button.with_label (_("Start Working"));
             btn_start.get_style_context ().add_class ("btn-start");
             btn_start.clicked.connect (() => {
+                this.get_style_context ().add_class ("working-time");
+                timer_grid.get_style_context().remove_class ("timer-grid");
+                timer_grid.get_style_context().add_class ("working-time");
+                timer_header.get_style_context().remove_class("timer-header");
+                timer_header.get_style_context().add_class ("working-time");
                 pomodoro.start_work ();
             });
             return btn_start;
