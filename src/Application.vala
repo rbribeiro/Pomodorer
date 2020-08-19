@@ -22,7 +22,7 @@ namespace App {
                 }
             });
 
-            Gtk.Settings.get_default ().gtk_application_prefer_dark_theme = true;
+            //Gtk.Settings.get_default ().gtk_application_prefer_dark_theme = true;
 
             var provider = new Gtk.CssProvider ();
             provider.load_from_resource ("com/github/aimproxy/cyfrif/Application.css");
